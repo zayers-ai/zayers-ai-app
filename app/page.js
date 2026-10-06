@@ -2,51 +2,47 @@
 import { useState, useRef, useEffect } from "react";
 export default function Home(){
 const [input,setInput]=useState("");
-const [messages,setMessages]=useState([{role:"ai",text:"Welcome, Boss.\n\nZAYERS • NIGHT VIPER • 2026\n\nYour private intelligence is live.",time:"Just now"}]);
+const [messages,setMessages]=useState([{role:"ai",text:"ZAYERS ULTRA • BLACK DIAMOND\n\nPrivate. Encrypted. Executive.\n\nWagwan Boss - I dey online."}]);
 const [isLoading,setIsLoading]=useState(false);
-const messagesEndRef=useRef(null);
-const investorKeynotes=[
-{label:"📈 Revenue Model",prompt:"Explain ZAYERS AI revenue model like to a billionaire investor"},
-{label:"⚡ Competitive Edge",prompt:"What makes ZAYERS AI better than ChatGPT?"},
-{label:"🌍 Scalability",prompt:"Explain scalability"},
-{label:"🛡️ Security",prompt:"Explain enterprise security"},
-];
-useEffect(()=>{messagesEndRef.current?.scrollIntoView({behavior:"smooth"});},[messages,isLoading]);
-const sendMessage=async(customText)=>{
-const textToSend=customText||input; if(!textToSend.trim()||isLoading) return;
-setMessages(v=>[...v,{role:"user",text:textToSend,time:"Just now"}]); setInput(""); setIsLoading(true);
+const endRef=useRef(null);
+useEffect(()=>{endRef.current?.scrollIntoView({behavior:"smooth"});},[messages,isLoading]);
+const send=async(t)=>{
+const txt=t||input; if(!txt.trim()||isLoading) return;
+setMessages(v=>[...v,{role:"user",text:txt}]); setInput(""); setIsLoading(true);
 try{
-const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:textToSend,history:messages.slice(-6).map(m=>({role:m.role==="user"?"user":"assistant",content:m.text}))})});
-const d=await res.json();
-setMessages(v=>[...v,{role:"ai",text:d.reply||"Done Boss",time:"Just now"}]);
-}catch{setMessages(v=>[...v,{role:"ai",text:"Network issue Boss",time:"Just now"}]);}
+const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:txt,history:messages.slice(-6).map(m=>({role:m.role==="user"?"user":"assistant",content:m.text}))})});
+const d=await r.json();
+setMessages(v=>[...v,{role:"ai",text:d.reply}]);
+}catch{setMessages(v=>[...v,{role:"ai",text:"Error Boss"}]);}
 setIsLoading(false);
 };
 return(
-<div style={{minHeight:"100vh",background:"#020202",display:"flex",justifyContent:"center"}}>
-<style>{`@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}} .f{animation:float 5s ease-in-out infinite} body{margin:0}`}</style>
-<div style={{width:"100%",maxWidth:410,height:"100vh",background:"radial-gradient(120% 80% at 50% -10%,#1a1a1a,#000000 70%)",display:"flex",flexDirection:"column",borderLeft:"1px solid #C9A86A15",borderRight:"1px solid #C9A86A15"}}>
-<div style={{padding:"30px 24px 18px",borderBottom:"1px solid #C9A86A18"}}>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-<span style={{fontSize:10,letterSpacing:5,color:"#C9A86A88"}}>ZAYERS • ILORIN • 2026</span>
-<span style={{width:7,height:7,borderRadius:7,background:"#00ff88",boxShadow:"0 0 12px #00ff88"}}></span>
+<div style={{minHeight:"100vh",background:"#000",display:"flex",justifyContent:"center"}}>
+<style>{`@keyframes f1{0%,100%{transform:translateY(0) translateZ(0)}50%{transform:translateY(-6px) translateZ(0)}} .b1{animation:f1 4s ease-in-out infinite} @keyframes f2{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}} .b2{animation:f2 5s ease-in-out infinite} *::-webkit-scrollbar{display:none}`}</style>
+<div style={{width:"100%",maxWidth:400,height:"100vh",background:"radial-gradient(90% 60% at 50% -20%,#1a1a1a 0%,#000 100%)",position:"relative",overflow:"hidden",display:"flex",flexDirection:"column"}}>
+<div style={{position:"absolute",top:-100,left:-100,width:300,height:300,background:"radial-gradient(circle,#C9A86A15,transparent 70%)",filter:"blur(30px)"}}></div>
+<div style={{position:"absolute",bottom:100,right:-50,width:250,height:250,background:"radial-gradient(circle,#ffffff08,transparent 70%)",filter:"blur(30px)"}}></div>
+<div style={{zIndex:2,padding:"32px 24px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+<div style={{display:"flex",alignItems:"center",gap:10}}>
+<div style={{width:2,height:22,background:"#C9A86A"}}></div>
+<div><div style={{color:"#fff",fontSize:12,letterSpacing:6,fontWeight:600}}>ZAYERS</div><div style={{color:"#C9A86A66",fontSize:8,letterSpacing:4,marginTop:2}}>ULTRA • 2026 • ILORIN</div></div>
 </div>
-<div style={{marginTop:20,fontSize:30,letterSpacing:6,fontWeight:200,color:"#C9A86A",fontFamily:"serif"}}>ZAYERS</div>
-<div style={{fontSize:9,letterSpacing:6,color:"#ffffff44",marginTop:4}}>AI ULTRA • NIGHT VIPER</div>
+<div style={{color:"#ffffff22",fontSize:10,letterSpacing:3}}>● LIVE</div>
 </div>
-<div style={{flex:1,overflowY:"auto",padding:"20px",display:"flex",flexDirection:"column",gap:16}}>
-{messages.map((m,i)=><div key={i} className="f" style={{alignSelf:m.role==="user"?"flex-end":"flex-start",maxWidth:"84%",padding:"15px 17px",borderRadius:m.role==="user"?"22px 22px 5px 22px":"22px 22px 22px 5px",background:m.role==="user"?"linear-gradient(135deg,#C9A86A,#E8D5B5)":"rgba(255,255,255,0.06)",backdropFilter:"blur(20px)",border:"1px solid "+(m.role==="user"?"#C9A86A":"#C9A86A28"),color:m.role==="user"?"#000":"#fff",boxShadow:m.role==="user"?"0 10px 24px #C9A86A33":"0 10px 30px #000000aa, inset 0 1px 0 #ffffff14",fontSize:13.5,lineHeight:1.6,whiteSpace:"pre-wrap"}}>{m.text}<div style={{fontSize:9,opacity:0.5,marginTop:8,letterSpacing:1}}>{m.time} • {m.role==="user"?"Delivered":"Encrypted"}</div></div>)}
-{isLoading&&<div style={{fontSize:10,letterSpacing:3,color:"#C9A86A66",paddingLeft:6}}>ZAYERS •••</div>}
-<div ref={messagesEndRef}/>
+<div style={{zIndex:2,flex:1,overflowY:"auto",padding:"10px 18px",display:"flex",flexDirection:"column",gap:18}}>
+{messages.map((m,i)=><div key={i} className={m.role==="user"?"b1":"b2"} style={{alignSelf:m.role==="user"?"flex-end":"flex-start",maxWidth:"86%",position:"relative"}}>
+<div style={{padding:"16px 18px",borderRadius:m.role==="user"?"24px 24px 6px 24px":"24px 24px 24px 6px",background:m.role==="user"?"#C9A86A":"rgba(255,255,255,0.05)",backdropFilter:"blur(40px)",border:"1px solid "+(m.role==="user"?"#C9A86A":"rgba(255,255,255,0.08)"),color:m.role==="user"?"#000":"#e8e6e1",fontSize:13.5,lineHeight:1.65,whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 12px 30px #C9A86A33":"0 12px 40px #000000cc, inset 0 1px 0 rgba(255,255,255,0.1)",fontWeight:m.role==="user"?600:400}}>{m.text}</div>
+<div style={{marginTop:6,fontSize:9,color:m.role==="user"?"#C9A86A88":"#ffffff33",letterSpacing:1,paddingLeft:m.role==="user"?0:4,textAlign:m.role==="user"?"right":"left"}}>{m.role==="user"?"DELIVERED • 09:32 AM":"ENCRYPTED • READ"}</div>
+</div>)}
+{isLoading&&<div style={{color:"#C9A86A44",fontSize:10,letterSpacing:4,paddingLeft:8}}>ZAYERS IS TYPING —</div>}
+<div ref={endRef}/>
 </div>
-<div style={{padding:"10px 18px",display:"flex",gap:8,flexWrap:"wrap"}}>
-{investorKeynotes.map(k=><button key={k.label} onClick={()=>sendMessage(k.prompt)} style={{background:"rgba(255,255,255,0.05)",backdropFilter:"blur(10px)",border:"1px solid #C9A86A30",borderRadius:100,padding:"8px 14px",fontSize:11,color:"#C9A86A",letterSpacing:0.5}}>{k.label}</button>)}
+<div style={{zIndex:2,padding:"16px 18px 26px"}}>
+<div style={{background:"rgba(255,255,255,0.06)",backdropFilter:"blur(40px)",border:"1px solid rgba(201,168,106,0.25)",borderRadius:100,padding:"5px 6px 5px 20px",display:"flex",alignItems:"center",gap:8,boxShadow:"0 20px 50px #000, inset 0 1px 0 rgba(255,255,255,0.12)"}}>
+<input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Message your private intelligence..." style={{flex:1,background:"transparent",border:"none",color:"#fff",outline:"none",fontSize:13.5,fontWeight:300,letterSpacing:0.3}}/>
+<button onClick={()=>send()} style={{width:38,height:38,borderRadius:19,background:"#C9A86A",border:"none",color:"#000",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>↗</button>
 </div>
-<div style={{padding:"14px 18px 24px",borderTop:"1px solid #ffffff08",display:"flex",gap:10,alignItems:"center",background:"linear-gradient(180deg,transparent,#000000aa)"}}>
-<div style={{flex:1,display:"flex",alignItems:"center",background:"rgba(255,255,255,0.06)",backdropFilter:"blur(30px)",border:"1px solid #C9A86A33",borderRadius:100,padding:"4px 6px 4px 18px",boxShadow:"0 10px 30px #000000aa, inset 0 1px 0 #ffffff14"}}>
-<input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&sendMessage()} placeholder="Ask ZAYERS anything..." style={{flex:1,background:"transparent",border:"none",color:"#fff",outline:"none",fontSize:13,letterSpacing:0.5}}/>
-<button onClick={()=>sendMessage()} style={{width:40,height:40,borderRadius:20,background:"linear-gradient(135deg,#C9A86A,#fff2cc)",border:"none",color:"#000",fontWeight:900,boxShadow:"0 0 15px #C9A86A66"}}>↗</button>
-</div>
+<div style={{textAlign:"center",marginTop:10,fontSize:8,letterSpacing:3,color:"#ffffff22"}}>BUILT FOR ILORIN • STREET SMART • BILLIONAIRE GRADE</div>
 </div>
 </div>
 </div>
