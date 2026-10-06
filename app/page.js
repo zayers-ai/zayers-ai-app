@@ -1,50 +1,43 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 
 export default function Home(){
-const [msg,setMsg]=useState("");
-const [chat,setChat]=useState([
-{role:"ai",text:"Welcome back!\nI'm ZAYER, your AI assistant.",sub:"Ready to create, code, or explore ideas together."},
-{role:"user",text:"Draft a launch post for our new product",time:"Now"},
-{role:"ai",text:"Got it! Here's a draft → 🚀\nIntroducing ZAYER ULTRA..."}
-]);
-const [loading,setLoading]=useState(false);
-const ref=useRef(null);
-useEffect(()=>{ref.current?.scrollIntoView({behavior:"smooth"})},[chat,loading]);
+const [m,setM]=useState("");
+const [c,setC]=useState([{r:"ai",t:"I am ZAYERS AI ⚡ Built by Zayers. The upgrade over ACE_X. What should we build today Boss?"}]);
+const [l,setL]=useState(false);
 
-async function send(t){
-const p=t||msg; if(!p.trim()) return;
-const userMsg={role:"user",text:p,time:"Now"};
-setChat(c=>[...c,userMsg]); setMsg(""); setLoading(true);
+async function send(x){
+const txt=x||m; if(!txt.trim()) return;
+setC(v=>[...v,{r:"u",t:txt}]); setM(""); setL(true);
 try{
-const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:p})});
-const d=await r.json();
-setChat(c=>[...c,{role:"ai",text:d.reply||d.message||"Done Boss"}]);
+const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:txt})});
+const d=await res.json();
+setC(v=>[...v,{r:"ai",t:d.reply||"Done Boss"}]);
 }catch{
-setChat(c=>[...c,{role:"ai",text:"Network glitch Boss, try again"}]);
+setC(v=>[...v,{r:"ai",t:"Network error Boss, try again"}]);
 }
-setLoading(false);
+setL(false);
 }
 
 return(
-<>
-<style>{`
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
-*{font-family:'Outfit',sans-serif}
-.glass{
-background:linear-gradient(135deg,rgba(255,255,255,0.14),rgba(255,255,255,0.06));
-backdrop-filter:blur(25px); -webkit-backdrop-filter:blur(25px);
-border:1px solid rgba(255,255,255,0.18);
-box-shadow:0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+<div style={{minHeight:"100vh",background:"#07070b",display:"flex",justifyContent:"center",padding:10}}>
+<div style={{width:"100%",maxWidth:400,background:"linear-gradient(180deg,#1a1625,#0a0a12)",borderRadius:28,border:"1px solid #ffffff18",height:"92vh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+<div style={{padding:14,display:"flex",alignItems:"center",gap:10,borderBottom:"1px solid #ffffff12"}}>
+<div style={{width:38,height:38,borderRadius:12,background:"#FFD700",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900}}>Z</div>
+<div style={{color:"#fff",fontWeight:800}}>ZAYERS AI <span style={{background:"#FFD70033",color:"#FFD700",fontSize:10,padding:"3px 8px",borderRadius:20,marginLeft:6}}>PRO</span></div>
+</div>
+<div style={{flex:1,overflowY:"auto",padding:14,display:"flex",flexDirection:"column",gap:10}}>
+{c.map((x,i)=><div key={i} style={{alignSelf:x.r==="u"?"flex-end":"flex-start",background:x.r==="u"?"#ffffff14":"#ffffff0a",border:"1px solid #ffffff14",color:"#fff",padding:"12px 14px",borderRadius:16,maxWidth:"85%",fontSize:14}}>{x.t}</div>)}
+{l&&<div style={{color:"#999",fontSize:12}}>ZAYERS typing...</div>}
+</div>
+<div style={{padding:10,display:"flex",gap:8,flexWrap:"wrap"}}>
+{["Build website","Viral script","Make me rich","Roast ACE_X"].map(t=><button key={t} onClick={()=>send(t)} style={{background:"#ffffff10",border:"1px solid #ffffff15",color:"#fff",borderRadius:20,padding:"6px 12px",fontSize:12}}>{t}</button>)}
+</div>
+<div style={{padding:10,display:"flex",gap:8}}>
+<input value={m} onChange={e=>setM(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask ZAYERS anything..." style={{flex:1,background:"#ffffff10",border:"1px solid #ffffff18",borderRadius:100,padding:"12px 16px",color:"#fff",outline:"none"}}/>
+<button onClick={()=>send()} style={{width:42,height:42,borderRadius:21,background:"#FFD700",border:"none",fontWeight:900}}>↑</button>
+</div>
+</div>
+</div>
+);
 }
-.card:hover{transform:translateY(-3px); box-shadow:0 12px 40px rgba(168,85,247,0.3)}
-`}</style>
-
-<div style={{minHeight:"100vh",background:"#050508",display:"flex",justifyContent:"center",padding:10}}>
-<div style={{width:"100%",maxWidth:420,minHeight:"92vh",background:"radial-gradient(600px at -10% -10%, #a855f7aa, transparent 60%), radial-gradient(600px at 110% 30%, #FFD70088, transparent 60%), radial-gradient(600px at 50% 120%, #06b6d499, transparent 70%), #0a0a12",borderRadius:32,border:"1px solid rgba(255,255,255,0.15)",position:"relative",overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:"0 20px 60px rgba(0,0,0,0.6)"}}>
-
-{/* Glow Orbs */}
-<div style={{position:"absolute",top:80,right:-40,width:200,height:200,background:"radial-gradient(circle,#FFD700,transparent 70%)",filter:"blur(30px)",opacity:0.6}}/>
-<div style={{position:"absolute",bottom:200,left:-30,width:250,height:250,background:"radial-gradient(circle,#a855f7,transparent 70%)",filter:"blur(35px)",opacity:0.5}}/>
-
-{
