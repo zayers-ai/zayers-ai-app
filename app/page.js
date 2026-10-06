@@ -13,29 +13,32 @@ try{
 const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:p})});
 const d=await r.json();
 setChat(c=>[...c,{role:"ai",content:d.reply||d.message||"ZAYERS online Boss."}]);
-}catch{setChat(c=>[...c,{role:"ai",content:"Network error Boss, retry."}]);}
+}catch{setChat(c=>[...c,{role:"ai",content:"Network error Boss"}]);}
 setLoading(false);
 }
 return(
-<div className="min-h-screen bg-[#050507] text-white flex flex-col">
-<header className="p-4 border-b border-white/10 flex justify-between bg-black/50 sticky top-0 z-50">
-<div className="flex gap-2 items-center"><div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center text-black font-bold">Z</div><b>ZAYERS AI</b><span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full">PRO</span></div>
-<span className="text-[10px] opacity-40">zayers-ai-app.vercel.app</span>
-</header>
-<div className="flex-1 overflow-auto p-4 space-y-3 max-w-3xl w-full mx-auto">
-{chat.map((m,i)=><div key={i} className={`flex ${m.role==="user"?"justify-end":"justify-start"}`}><div className={`${m.role==="user"?"bg-white text-black":"bg-[#14141a] border border-yellow-500/20"} px-5 py-3 rounded-[20px] max-w-[85%] text-[14px] ${m.role==="user"?"rounded-br-[5px]":"rounded-bl-[5px]"}`}>{m.content}</div></div>)}
-{loading&&<div className="text-yellow-400 text-sm animate-pulse">ZAYERS is thinking...</div>}
+<div style={{minHeight:"100vh",background:"#070709",color:"#fff",display:"flex",flexDirection:"column",fontFamily:"sans-serif"}}>
+<div style={{padding:16,borderBottom:"1px solid #222",display:"flex",justifyContent:"space-between",background:"#000",position:"sticky",top:0}}>
+<div style={{display:"flex",gap:8,alignItems:"center"}}><div style={{width:32,height:32,borderRadius:16,background:"linear-gradient(135deg,#FFD700,#FF8C00)",color:"#000",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900}}>Z</div><b style={{letterSpacing:2}}>ZAYERS AI</b><span style={{fontSize:10,background:"#FFD70033",color:"#FFD700",padding:"4px 8px",borderRadius:10}}>PRO</span></div>
+<span style={{fontSize:10,opacity:0.4}}>zayers-ai-app.vercel.app</span>
+</div>
+
+<div style={{flex:1,overflow:"auto",padding:16,maxWidth:700,width:"100%",margin:"0 auto",display:"flex",flexDirection:"column",gap:12}}>
+{chat.map((m,i)=><div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}}><div style={{background:m.role==="user"?"#fff":"#15151a",color:m.role==="user"?"#000":"#fff",padding:"12px 16px",borderRadius:20,borderBottomRightRadius:m.role==="user"?4:20,borderBottomLeftRadius:m.role==="user"?20:4,maxWidth:"85%",border:m.role==="user"?"none":"1px solid #FFD70022",fontSize:14}}>{m.content}</div></div>)}
+{loading&&<div style={{color:"#FFD700",fontSize:13}}>ZAYERS is thinking...</div>}
 <div ref={ref}/>
 </div>
-<div className="max-w-3xl w-full mx-auto px-4 flex gap-2 pb-2 overflow-x-auto">
-{["Build website","Viral script","Make me rich","Roast ACE_X"].map(q=><button key={q} onClick={()=>send(q)} className="whitespace-nowrap text-xs px-4 py-2 rounded-full bg-white/10 border border-white/10 hover:bg-yellow-500 hover:text-black">{q}</button>)}
+
+<div style={{maxWidth:700,width:"100%",margin:"0 auto",padding:"0 16px 8px",display:"flex",gap:8,overflowX:"auto"}}>
+{["Build website","Viral script","Make me rich","Roast ACE_X"].map(q=><button key={q} onClick={()=>send(q)} style={{whiteSpace:"nowrap",fontSize:12,padding:"8px 14px",borderRadius:20,background:"#1a1a20",border:"1px solid #333",color:"#fff"}}>{q}</button>)}
 </div>
-<div className="p-4 border-t border-white/10 bg-black/80 sticky bottom-0">
-<div className="max-w-3xl mx-auto flex gap-2 bg-[#18181e] rounded-full p-2 border border-white/10">
-<input value={msg} onChange={e=>setMsg(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask ZAYERS anything..." className="flex-1 bg-transparent outline-none px-4 text-sm"/>
-<button onClick={()=>send()} className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 text-black font-bold">↑</button>
+
+<div style={{padding:12,borderTop:"1px solid #222",background:"#000",position:"sticky",bottom:0}}>
+<div style={{maxWidth:700,margin:"0 auto",display:"flex",gap:8,background:"#1a1a20",borderRadius:30,padding:8,border:"1px solid #333"}}>
+<input value={msg} onChange={e=>setMsg(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask ZAYERS anything..." style={{flex:1,background:"transparent",border:"none",outline:"none",padding:"0 12px",color:"#fff"}}/>
+<button onClick={()=>send()} style={{width:40,height:40,borderRadius:20,background:"linear-gradient(135deg,#FFD700,#FF8C00)",color:"#000",border:"none",fontWeight:900}}>↑</button>
 </div>
-<p className="text-center text-[9px] opacity-30 mt-2">Built by ZAYERS • Ilorin, Kwara • Better than ACE_X</p>
+<p style={{textAlign:"center",fontSize:9,opacity:0.3,marginTop:8}}>Built by ZAYERS • Ilorin, Kwara • Better than ACE_X</p>
 </div>
 </div>
 )}
