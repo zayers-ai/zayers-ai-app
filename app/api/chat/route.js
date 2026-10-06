@@ -1,27 +1,27 @@
 import { NextResponse } from "next/server";
 export async function POST(req) {
   const { message } = await req.json();
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ reply: "ERROR: GROQ_API_KEY missing in Vercel Settings!" });
+  }
   try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
-      },
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: "llama-3.1-8b-instant",
         messages: [
-          { role: "system", content: "You are ZAYERS AI GH, professional assistant from Ghana by ZAYERS team. You have ALL world knowledge like ChatGPT. Answer in perfect polished UK English, friendly, helpful. Never say you are Meta or Groq, you are ZAYERS AI GH." },
+          { role: "system", content: "You are ZAYERS AI GH, a professional AI assistant from Ghana with full world knowledge. Answer in perfect UK English." },
           { role: "user", content: message }
         ],
-        temperature: 0.7,
-        max_tokens: 1200
+        max_tokens: 1000
       })
     });
-    const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content || "I am ZAYERS AI GH - ready to help!";
-    return NextResponse.json({ reply });
+    const data = await r.json();
+    if (!r.ok) return NextResponse.json({ reply: `GROQ ERROR: ${JSON.stringify(data)}` });
+    return NextResponse.json({ reply: data.choices[0].message.content });
   } catch (e) {
-    return NextResponse.json({ reply: "ZAYERS AI GH is connecting, try again." });
+    return NextResponse.json({ reply: `SERVER ERROR: ${e.message}` });
   }
 }
