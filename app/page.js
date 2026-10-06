@@ -1,195 +1,54 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-
-export default function Home() {
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([
-    {
-      role: "ai",
-      text: "Welcome. Zayers AI enterprise suite initialized. Select a strategic keynote below or input a custom prompt.",
-      time: "Just now"
-    }
-  ]);
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef(null);
-
-  const investorKeynotes = [
-    { label: "📈 Revenue Model", prompt: "Explain the revenue model and monetisation strategy for Zayers AI." },
-    { label: "⚡ Competitive Edge", prompt: "What makes Zayers AI superior to existing market solutions?" },
-    { label: "📊 Scalability & TAM", prompt: "What is the Total Addressable Market (TAM) and scalability roadmap?" },
-    { label: "🛡️ Security & Enterprise", prompt: "How does Zayers AI handle enterprise data security and compliance?" }
-  ];
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
-
-  const sendMessage = async (customText) => {
-    const textToSend = customText || input;
-    if (!textToSend.trim() || isLoading) return;
-
-    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    setInput("");
-    setIsLoading(true);
-
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", text: textToSend, time: currentTime }
-    ]);
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: textToSend }),
-      });
-      const data = await res.json();
-
-      setMessages((prev) => [
-        ...prev,
-        { role: "ai", text: data.reply || "Execution completed successfully.", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
-      ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "ai", text: "Enterprise Connection Error: Failed to reach backend API.", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#030712] p-4 font-sans text-slate-100 selection:bg-emerald-500/30 selection:text-emerald-200">
-      
-      {/* Rich Glowing Aura Backgrounds */}
-      <div className="absolute top-[-10%] left-[-10%] h-[600px] w-[600px] rounded-full bg-gradient-to-br from-emerald-500/20 via-teal-600/10 to-transparent blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] h-[600px] w-[600px] rounded-full bg-gradient-to-tl from-cyan-500/20 via-indigo-600/10 to-transparent blur-[150px] pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[400px] rounded-full bg-amber-500/10 blur-[160px] pointer-events-none" />
-
-      {/* Main Glass Box */}
-      <div className="relative z-10 flex h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-emerald-500/20 bg-slate-950/80 shadow-[0_0_80px_-15px_rgba(16,185,129,0.15)] backdrop-blur-2xl">
-        
-        {/* Header Bar */}
-        <header className="flex items-center justify-between border-b border-emerald-500/20 bg-slate-900/50 px-6 py-4 backdrop-blur-md">
-          <div className="flex items-center gap-4">
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-400 via-teal-500 to-cyan-400 font-extrabold text-slate-950 shadow-lg shadow-emerald-500/25">
-              <span className="text-xl tracking-wider">Z</span>
-              <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-slate-950 animate-pulse" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold tracking-tight text-white">Zayers AI</h1>
-                <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 tracking-wider uppercase shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                  Enterprise v2.4
-                </span>
-              </div>
-              <p className="text-xs text-emerald-400/70 font-medium">Next-Gen Autonomous Intelligence</p>
-            </div>
-          </div>
-
-          {/* Quick Metrics */}
-          <div className="hidden sm:flex items-center gap-6 border-l border-white/10 pl-6 text-xs">
-            <div>
-              <p className="text-slate-400">Latency</p>
-              <p className="font-semibold text-emerald-400">&lt; 12ms</p>
-            </div>
-            <div>
-              <p className="text-slate-400">Uptime</p>
-              <p className="font-semibold text-cyan-400">99.99%</p>
-            </div>
-            <div>
-              <p className="text-slate-400">Status</p>
-              <p className="font-semibold text-amber-400">Optimal</p>
-            </div>
-          </div>
-        </header>
-
-        {/* Chat Feed */}
-        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-5 scrollbar-thin scrollbar-thumb-slate-800">
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`flex flex-col max-w-[80%] ${
-                msg.role === "user" ? "self-end items-end" : "self-start items-start"
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1.5 px-1 text-[11px] font-semibold text-slate-400">
-                <span className={msg.role === "user" ? "text-amber-400" : "text-emerald-400"}>
-                  {msg.role === "user" ? "Executive Guest" : "Zayers AI Engine"}
-                </span>
-                <span>•</span>
-                <span>{msg.time}</span>
-              </div>
-              
-              <div
-                className={`rounded-2xl px-5 py-3.5 text-sm leading-relaxed shadow-xl backdrop-blur-md transition-all ${
-                  msg.role === "user"
-                    ? "bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-slate-950 font-semibold rounded-tr-none shadow-amber-500/15"
-                    : "bg-slate-900/90 text-slate-100 border border-emerald-500/20 rounded-tl-none shadow-emerald-500/5"
-                }`}
-              >
-                {msg.text}
-              </div>
-            </div>
-          ))}
-
-          {/* Loading Dots */}
-          {isLoading && (
-            <div className="self-start flex flex-col items-start gap-1">
-              <span className="text-[11px] font-semibold text-emerald-400 px-1">Zayers AI Engine</span>
-              <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-none border border-emerald-500/20 bg-slate-900/90 px-4 py-3">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-bounce" />
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-bounce [animation-delay:0.2s]" />
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-bounce [animation-delay:0.4s]" />
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Keynote Quick Buttons */}
-        <div className="border-t border-emerald-500/15 bg-slate-950/40 px-6 py-3 backdrop-blur-md">
-          <p className="mb-2 text-[11px] font-bold tracking-wider text-emerald-400/80 uppercase">
-            Executive Keynotes
-          </p>
-          <div className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar">
-            {investorKeynotes.map((item, idx) => (
-              <button
-                key={idx}
-                onClick={() => sendMessage(item.prompt)}
-                disabled={isLoading}
-                className="whitespace-nowrap rounded-xl border border-emerald-500/30 bg-emerald-950/30 px-4 py-2 text-xs font-semibold text-emerald-200 hover:border-emerald-400 hover:bg-emerald-500/20 hover:text-white hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all active:scale-95 disabled:opacity-50"
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Console Input Bar */}
-        <div className="p-4 bg-slate-950 border-t border-emerald-500/20">
-          <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-slate-900/60 p-2 backdrop-blur-md focus-within:border-emerald-400 focus-within:ring-1 focus-within:ring-emerald-400 focus-within:shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all">
-            <input
-              type="text"
-              className="flex-1 bg-transparent px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
-              placeholder="Ask Zayers AI a strategic question..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              disabled={isLoading}
-            />
-            <button
-              onClick={() => sendMessage()}
-              disabled={isLoading || !input.trim()}
-              className="flex items-center justify-center rounded-xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-950 shadow-lg shadow-emerald-500/25 hover:brightness-110 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              Execute
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </main>
-  );
+export default function Home(){
+const [input,setInput]=useState("");
+const [messages,setMessages]=useState([{role:"ai",text:"Welcome, Boss.\n\nZAYERS • NIGHT VIPER • 2026\n\nYour private intelligence is live.",time:"Just now"}]);
+const [isLoading,setIsLoading]=useState(false);
+const messagesEndRef=useRef(null);
+const investorKeynotes=[
+{label:"📈 Revenue Model",prompt:"Explain ZAYERS AI revenue model like to a billionaire investor"},
+{label:"⚡ Competitive Edge",prompt:"What makes ZAYERS AI better than ChatGPT?"},
+{label:"🌍 Scalability",prompt:"Explain scalability"},
+{label:"🛡️ Security",prompt:"Explain enterprise security"},
+];
+useEffect(()=>{messagesEndRef.current?.scrollIntoView({behavior:"smooth"});},[messages,isLoading]);
+const sendMessage=async(customText)=>{
+const textToSend=customText||input; if(!textToSend.trim()||isLoading) return;
+setMessages(v=>[...v,{role:"user",text:textToSend,time:"Just now"}]); setInput(""); setIsLoading(true);
+try{
+const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:textToSend,history:messages.slice(-6).map(m=>({role:m.role==="user"?"user":"assistant",content:m.text}))})});
+const d=await res.json();
+setMessages(v=>[...v,{role:"ai",text:d.reply||"Done Boss",time:"Just now"}]);
+}catch{setMessages(v=>[...v,{role:"ai",text:"Network issue Boss",time:"Just now"}]);}
+setIsLoading(false);
+};
+return(
+<div style={{minHeight:"100vh",background:"#020202",display:"flex",justifyContent:"center"}}>
+<style>{`@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}} .f{animation:float 5s ease-in-out infinite} body{margin:0}`}</style>
+<div style={{width:"100%",maxWidth:410,height:"100vh",background:"radial-gradient(120% 80% at 50% -10%,#1a1a1a,#000000 70%)",display:"flex",flexDirection:"column",borderLeft:"1px solid #C9A86A15",borderRight:"1px solid #C9A86A15"}}>
+<div style={{padding:"30px 24px 18px",borderBottom:"1px solid #C9A86A18"}}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+<span style={{fontSize:10,letterSpacing:5,color:"#C9A86A88"}}>ZAYERS • ILORIN • 2026</span>
+<span style={{width:7,height:7,borderRadius:7,background:"#00ff88",boxShadow:"0 0 12px #00ff88"}}></span>
+</div>
+<div style={{marginTop:20,fontSize:30,letterSpacing:6,fontWeight:200,color:"#C9A86A",fontFamily:"serif"}}>ZAYERS</div>
+<div style={{fontSize:9,letterSpacing:6,color:"#ffffff44",marginTop:4}}>AI ULTRA • NIGHT VIPER</div>
+</div>
+<div style={{flex:1,overflowY:"auto",padding:"20px",display:"flex",flexDirection:"column",gap:16}}>
+{messages.map((m,i)=><div key={i} className="f" style={{alignSelf:m.role==="user"?"flex-end":"flex-start",maxWidth:"84%",padding:"15px 17px",borderRadius:m.role==="user"?"22px 22px 5px 22px":"22px 22px 22px 5px",background:m.role==="user"?"linear-gradient(135deg,#C9A86A,#E8D5B5)":"rgba(255,255,255,0.06)",backdropFilter:"blur(20px)",border:"1px solid "+(m.role==="user"?"#C9A86A":"#C9A86A28"),color:m.role==="user"?"#000":"#fff",boxShadow:m.role==="user"?"0 10px 24px #C9A86A33":"0 10px 30px #000000aa, inset 0 1px 0 #ffffff14",fontSize:13.5,lineHeight:1.6,whiteSpace:"pre-wrap"}}>{m.text}<div style={{fontSize:9,opacity:0.5,marginTop:8,letterSpacing:1}}>{m.time} • {m.role==="user"?"Delivered":"Encrypted"}</div></div>)}
+{isLoading&&<div style={{fontSize:10,letterSpacing:3,color:"#C9A86A66",paddingLeft:6}}>ZAYERS •••</div>}
+<div ref={messagesEndRef}/>
+</div>
+<div style={{padding:"10px 18px",display:"flex",gap:8,flexWrap:"wrap"}}>
+{investorKeynotes.map(k=><button key={k.label} onClick={()=>sendMessage(k.prompt)} style={{background:"rgba(255,255,255,0.05)",backdropFilter:"blur(10px)",border:"1px solid #C9A86A30",borderRadius:100,padding:"8px 14px",fontSize:11,color:"#C9A86A",letterSpacing:0.5}}>{k.label}</button>)}
+</div>
+<div style={{padding:"14px 18px 24px",borderTop:"1px solid #ffffff08",display:"flex",gap:10,alignItems:"center",background:"linear-gradient(180deg,transparent,#000000aa)"}}>
+<div style={{flex:1,display:"flex",alignItems:"center",background:"rgba(255,255,255,0.06)",backdropFilter:"blur(30px)",border:"1px solid #C9A86A33",borderRadius:100,padding:"4px 6px 4px 18px",boxShadow:"0 10px 30px #000000aa, inset 0 1px 0 #ffffff14"}}>
+<input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&sendMessage()} placeholder="Ask ZAYERS anything..." style={{flex:1,background:"transparent",border:"none",color:"#fff",outline:"none",fontSize:13,letterSpacing:0.5}}/>
+<button onClick={()=>sendMessage()} style={{width:40,height:40,borderRadius:20,background:"linear-gradient(135deg,#C9A86A,#fff2cc)",border:"none",color:"#000",fontWeight:900,boxShadow:"0 0 15px #C9A86A66"}}>↗</button>
+</div>
+</div>
+</div>
+</div>
+);
 }
