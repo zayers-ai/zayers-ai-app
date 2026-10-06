@@ -1,47 +1,70 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
-export default function ZayersAI(){
-const [input,setInput]=useState("");
-const [msgs,setMsgs]=useState([{role:"ai",text:"Hello! I am ZAYERS AI GH — Your professional AI assistant developed in Ghana. How may I assist you today?"}]);
-const [listen,setListen]=useState(false);
-const [load,setLoad]=useState(false);
-const ref=useRef(null);
-useEffect(()=>{ref.current?.scrollIntoView({behavior:"smooth"})},[msgs]);
-const voice=()=>{
-const S=window.SpeechRecognition||window.webkitSpeechRecognition;
-if(!S){alert("Please use Google Chrome for voice input");return;}
-const r=new S();r.lang="en-GB";r.start();setListen(true);
-r.onresult=e=>{setInput(e.results[0][0].transcript);setListen(false);};
-r.onend=()=>setListen(false);
-};
-const send=async()=>{
-if(!input.trim())return;
-const text=input;
-setMsgs(m=>[...m,{role:"user",text}]);
-setInput("");setLoad(true);
-try{
-const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text})});
-const d=await res.json();
-setMsgs(m=>[...m,{role:"ai",text:d.reply}]);
-}catch{setMsgs(m=>[...m,{role:"ai",text:"My apologies, I am experiencing a temporary connection issue. Please try again."}]);}
-setLoad(false);
-};
-return(
-<div style={{background:"black",color:"white",height:"100vh",display:"flex",flexDirection:"column",fontFamily:"system-ui"}}>
-<header style={{padding:"16px",borderBottom:"1px solid #222",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-<b>ZAYERS <span style={{color:"#FFD700"}}>AI GH</span></b>
-<span style={{background:"#FFD700",color:"black",padding:"4px 12px",borderRadius:"20px",fontSize:"11px",fontWeight:"700"}}>UK ENGLISH • PROFESSIONAL</span>
-</header>
-<div style={{flex:1,overflowY:"auto",padding:"16px",display:"flex",flexDirection:"column",gap:"12px"}}>
-{msgs.map((m,i)=><div key={i} style={{alignSelf:m.role==="user"?"flex-end":"flex-start",background:m.role==="user"?"#FFD700":"#1a1a1a",color:m.role==="user"?"black":"white",padding:"12px 16px",borderRadius:"18px",maxWidth:"80%"}}>{m.text}</div>)}
-{load&&<div style={{color:"#FFD700"}}>ZAYERS AI is responding...</div>}
-<div ref={ref}/>
-</div>
-<div style={{padding:"12px",borderTop:"1px solid #222",display:"flex",gap:"8px"}}>
-<button onClick={voice} style={{background:listen?"#FFD700":"#222",color:listen?"black":"white",border:"none",borderRadius:"50%",width:"44px",height:"44px"}}>🎤</button>
-<input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask me anything in perfect English..." style={{flex:1,background:"#111",border:"1px solid #333",borderRadius:"25px",padding:"12px 16px",color:"white"}}/>
-<button onClick={send} style={{background:"#FFD700",border:"none",borderRadius:"50%",width:"44px",height:"44px"}}>↑</button>
-</div>
-</div>
-);
+import { useState } from "react";
+
+export default function Home() {
+  const [msg, setMsg] = useState("");
+  const [chat, setChat] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  async function send(text) {
+    const prompt = text || msg;
+    if(!prompt) return;
+    setChat([...chat, {role:"user", content:prompt}]);
+    setMsg(""); setLoading(true);
+    const res = await fetch("/api/chat", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({message: prompt})
+    });
+    const data = await res.json();
+    setChat(c => [...c, {role:"ai", content:data.reply}]);
+    setLoading(false);
+  }
+
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col items-center p-4" style={{background: "radial-gradient(circle at top, #1a1a00, #000)"}}>
+      <div className="w-full max-w-md">
+        {/* HEADER */}
+        <div className="flex items-center gap-3 mt-6 mb-2">
+          <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-yellow-700 rounded-xl flex items-center justify-center text-black font-black text-2xl">Z</div>
+          <div>
+            <h1 className="text-xl font-bold text-yellow-400">ZAYERS AI GH</h1>
+            <p className="text-xs opacity-70">Your Ghanaian AI • Smarter than ACE_X <span className="ml-2">🇬🇭 Made in Ghana</span></p>
+          </div>
+        </div>
+
+        <div className="bg-zinc-900/80 border border-yellow-600/30 rounded-3xl p-5 mt-6">
+          <h2 className="text-yellow-200 text-xl font-semibold">Hello, welcome back!</h2>
+          <p className="text-sm opacity-60 mb-4">How can I help you today?</p>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button onClick={()=>send("Summarise this text for me")} className="border border-yellow-500/30 rounded-2xl p-4 text-left hover:bg-yellow-500/10">
+              <div className="text-yellow-400 font-bold">📝 Summarise text</div><div className="text-[10px] opacity-60">Condense long notes</div>
+            </button>
+            <button onClick={()=>send("Write code for me")} className="border border-yellow-500/30 rounded-2xl p-4 text-left hover:bg-yellow-500/10">
+              <div className="text-yellow-400 font-bold">{"</>"} Write code</div><div className="text-[10px] opacity-60">JS, Python & more</div>
+            </button>
+            <button onClick={()=>send("Fix my code")} className="border border-yellow-500/30 rounded-2xl p-4 text-left hover:bg-yellow-500/10">
+              <div className="text-yellow-400 font-bold">🛠 Fix my code</div><div className="text-[10px] opacity-60">Debug instantly</div>
+            </button>
+            <button onClick={()=>send("Solve BECE/WASSCE past question")} className="border border-yellow-500/30 rounded-2xl p-4 text-left hover:bg-yellow-500/10">
+              <div className="text-yellow-400 font-bold">🎓 Solve BECE/WASSCE</div><div className="text-[10px] opacity-60">Past questions</div>
+            </button>
+          </div>
+
+          <div className="mt-4 space-y-2 max-h-60 overflow-auto">
+            {chat.map((c,i)=><div key={i} className={c.role=="user"?"text-right":"text-left"}><div className={`inline-block p-2 rounded-xl mt-2 text-sm ${c.role=="user"?"bg-yellow-500 text-black":"bg-zinc-800 text-yellow-100"}`}>{c.content}</div></div>)}
+            {loading && <div className="text-xs text-yellow-400 animate-pulse">ZAYERS AI is thinking...</div>}
+          </div>
+        </div>
+
+        {/* INPUT */}
+        <div className="flex gap-2 mt-4 bg-zinc-900 border border-yellow-600/40 rounded-full p-2">
+          <input value={msg} onChange={e=>setMsg(e.target.value)} placeholder="Ask anything..." className="flex-1 bg-transparent outline-none px-3 text-sm"/>
+          <button onClick={()=>send()} className="bg-yellow-500 text-black rounded-full px-5 py-2 font-bold">➤</button>
+        </div>
+        <p className="text-center text-[10px] opacity-40 mt-3">Premium • Faster than ACE_X AI • Secure & Private</p>
+      </div>
+    </div>
+  );
 }
