@@ -2,56 +2,36 @@ import Groq from "groq-sdk";
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(req) {
-  const { message, image } = await req.json();
+  const body = await req.json();
+  const { message, image } = body;
 
   try {
-    let completion;
-
-    if (image) {
-      // NEW 2026 VISION MODEL WEY DEY ALIVE BRO
-      completion = await groq.chat.completions.create({
-        model: "meta-llama/llama-4-scout-17b-16e-instruct",
-        messages: [
+    const messages = image
+     ? [
           {
             role: "user",
             content: [
-              { type: "text", text: message || "Describe this image bro" },
+              { type: "text", text: message || "Wetin dey inside this image bro? Describe am with bro style" },
               { type: "image_url", image_url: { url: image } },
             ],
           },
-        ],
-        max_tokens: 1000,
-      });
-    } else {
-      // Text only - use best fast model
-      completion = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        messages: [{ role: "user", content: message }],
-        max_tokens: 1000,
-      });
-    }
+        ]
+      : [
+          { role: "system", content: "You be ZAYERS AI, built for Ilorin by sharp guy. You dey always add 'bro' for your talk. You be street smart, funny, helpful. You dey loyal." },
+          { role: "user", content: message },
+        ];
+
+    // Use new eye wey Groq never kill bro
+    const model = image? "meta-llama/llama-4-scout-17b-16e-instruct" : "llama-3.3-70b-versatile";
+
+    const completion = await groq.chat.completions.create({
+      model: model,
+      messages: messages,
+      max_tokens: 1000,
+    });
 
     return Response.json({ reply: completion.choices[0].message.content });
-
   } catch (e) {
-    console.log("First try fail:", e.message);
-    // BACKUP EYE if scout fail bro
-    try {
-      const backup = await groq.chat.completions.create({
-        model: "qwen/qwen3-32b",
-        messages: image? [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: message || "Describe this image" },
-              { type: "image_url", image_url: { url: image } },
-            ],
-          }
-        ] : [{ role: "user", content: message }],
-      });
-      return Response.json({ reply: backup.choices[0].message.content });
-    } catch (err) {
-      return Response.json({ reply: `Bro Groq error: ${e.message}` });
-    }
+    return Response.json({ reply: "Error bro: " + e.message });
   }
 }
