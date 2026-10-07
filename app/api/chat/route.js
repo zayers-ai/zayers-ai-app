@@ -1,47 +1,57 @@
-import { NextResponse } from "next/server";
+import Groq from "groq-sdk";
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(req) {
+  const { message, image } = await req.json();
+
   try {
-    const { message, image } = await req.json();
+    let completion;
 
-    const isVision =!!image;
-    // Text brain = gpt-oss-20b (no error) bro, Vision brain = llama-3.2-11b (eye) bro
-    const model = isVision? "llama-3.2-11b-vision-preview" : "openai/gpt-oss-20b";
-
-    const userContent = isVision
-     ? [
-          { type: "text", text: message || "Describe this image" },
-          { type: "image_url", image_url: { url: image } }
-        ]
-      : message;
-
-    const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: model,
+    if (image) {
+      // NEW 2026 VISION MODEL WEY DEY ALIVE BRO
+      completion = await groq.chat.completions.create({
+        model: "meta-llama/llama-4-scout-17b-16e-instruct",
         messages: [
-          { role: "system", content: "You are ZAYERS AI, built in Ilorin, Kwara. Helpful, formal and intelligent like ChatGPT but with small Ilorin vibe. You can see images." },
-          { role: "user", content: userContent }
+          {
+            role: "user",
+            content: [
+              { type: "text", text: message || "Describe this image bro" },
+              { type: "image_url", image_url: { url: image } },
+            ],
+          },
         ],
-        max_tokens: 1024
-      })
-    });
-
-    const data = await r.json();
-
-    if (data.error) {
-      return NextResponse.json({ reply: "Groq says: " + data.error.message });
+        max_tokens: 1000,
+      });
+    } else {
+      // Text only - use best fast model
+      completion = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: message }],
+        max_tokens: 1000,
+      });
     }
 
-    return NextResponse.json({
-      reply: data.choices?.[0]?.message?.content || "I no fit reply now bro"
-    });
+    return Response.json({ reply: completion.choices[0].message.content });
 
   } catch (e) {
-    return NextResponse.json({ reply: "Brain error: " + e.message });
+    console.log("First try fail:", e.message);
+    // BACKUP EYE if scout fail bro
+    try {
+      const backup = await groq.chat.completions.create({
+        model: "qwen/qwen3-32b",
+        messages: image? [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: message || "Describe this image" },
+              { type: "image_url", image_url: { url: image } },
+            ],
+          }
+        ] : [{ role: "user", content: message }],
+      });
+      return Response.json({ reply: backup.choices[0].message.content });
+    } catch (err) {
+      return Response.json({ reply: `Bro Groq error: ${e.message}` });
+    }
   }
 }
