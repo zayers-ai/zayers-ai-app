@@ -1,20 +1,19 @@
-// FILE: app/api/chat/route.ts
-// PASTE THIS - FINAL FIX FOR ZAYERS
-
+// FILE: app/api/chat/route.js - WORKING VERSION
 import Groq from "groq-sdk";
 
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY!,
+  apiKey: process.env.GROQ_API_KEY,
 });
 
-export async function POST(req: Request) {
+export async function POST(req) {
   try {
-    const { messages, image } = await req.json();
+    const body = await req.json();
+    const messages = body.messages;
+    const image = body.image;
 
-    // 1. IF USER SENDS IMAGE - Use Vision Model (Worldwide stable)
     if (image) {
       const response = await groq.chat.completions.create({
-        model: "qwen/qwen3-32b", // NEW - replaces dead llama-3.2-11b-vision
+        model: "qwen/qwen3-32b",
         messages: [
           {
             role: "user",
@@ -29,18 +28,15 @@ export async function POST(req: Request) {
       return Response.json({ reply: response.choices[0].message.content });
     }
 
-    // 2. IF TEXT ONLY - Use Fast Text Model
     const response = await groq.chat.completions.create({
-      model: "openai/gpt-oss-20b", // NEW - replaces dead llama-3.3-70b
+      model: "openai/gpt-oss-20b",
       messages: messages,
-      temperature: 0.7,
       max_tokens: 1024,
     });
 
     return Response.json({ reply: response.choices[0].message.content });
 
-  } catch (error: any) {
-    console.error("ZAYERS Error:", error);
+  } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
