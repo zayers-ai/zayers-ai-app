@@ -1,48 +1,69 @@
 "use client";
 import {useState,useRef,useEffect} from "react";
 export default function Home(){
-const [input,setInput]=useState("");
-const [messages,setMessages]=useState([{role:"ai",text:"Yo! I be ZAYERS AI, built for Ilorin. Wetin you need bro?"}]);
-const [isLoading,setIsLoading]=useState(false);
-const endRef=useRef(null);
-useEffect(()=>{endRef.current?.scrollIntoView({behavior:"smooth"})},[messages,isLoading]);
-const send=async(t)=>{
-const txt=t||input; if(!txt.trim()||isLoading)return;
-setMessages(v=>[...v,{role:"user",text:txt}]);
-setInput("");
-setIsLoading(true);
-try{
-const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:txt})});
-const d=await r.json();
-setMessages(v=>[...v,{role:"ai",text:d.reply}]);
-}catch{setMessages(v=>[...v,{role:"ai",text:"Error Boss, try again"}])}
-setIsLoading(false);
-};
-return(
-<div style={{minHeight:"100vh",background:"#000",display:"flex",justifyContent:"center"}}>
-<style>{`@keyframes f1{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}`}</style>
-<div style={{width:"100%",maxWidth:400,height:"100vh",background:"#0a0a0a",display:"flex",flexDirection:"column",position:"relative",overflow:"hidden",border:"1px solid #222"}}>
-<div style={{position:"absolute",top:-100,left:-100,width:300,height:300,background:"radial-gradient(circle,rgba(251,146,60,0.15),transparent)",filter:"blur(30px)"}}></div>
-<div style={{position:"absolute",bottom:100,right:-50,width:300,height:300,background:"radial-gradient(circle,rgba(168,85,247,0.15),transparent)",filter:"blur(30px)"}}></div>
-<div style={{zIndex:2,padding:"32px 24px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-<div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:2,height:22,background:"#C9A86A"}}></div><div><div style={{color:"#fff",fontSize:12,letterSpacing:3,fontWeight:"bold"}}>ZAYERS AI</div><div style={{color:"#ffffff44",fontSize:8,letterSpacing:2}}>ILORIN • STREET SMART</div></div></div>
-<div style={{color:"#ffffff22",fontSize:10}}>BETA</div>
-</div>
-<div style={{zIndex:2,flex:1,overflowY:"auto",padding:"10px 16px"}}>
-{messages.map((m,i)=><div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",marginBottom:12}}><div style={{padding:"14px 16px",borderRadius:m.role==="user"?"20px 20px 4px 20px":"20px 20px 20px 4px",maxWidth:"85%",background:m.role==="user"?"#fff":"rgba(255,255,255,0.06)",color:m.role==="user"?"#000":"#fff",fontSize:13}}>{m.text}</div></div>)}
-{isLoading&&<div style={{color:"#C9A86A88",fontSize:12,padding:10}}>ZAYERS dey think...</div>}
-<div ref={endRef}/>
-</div>
-<div style={{zIndex:2,padding:"16px 18px 26px"}}>
-<div style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:999,display:"flex",alignItems:"center",gap:8,padding:"8px 8px 8px 14px"}}>
-<label style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(255,255,255,0.1)",borderRadius:999,cursor:"pointer"}}>📎<input type="file" hidden/></label>
-<label style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(255,255,255,0.1)",borderRadius:999,cursor:"pointer"}}>🖼️<input type="file" hidden accept="image/*"/></label>
-<input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} style={{flex:1,background:"transparent",border:"none",outline:"none",color:"#fff",fontSize:14}} placeholder="Ask anything 📎🖼️🎤" />
-<button onClick={()=>send()} style={{width:38,height:38,borderRadius:999,background:"linear-gradient(90deg,#fb923c,#a855f7)",color:"#fff",border:"none",fontWeight:"bold"}}>↑</button>
-</div>
-<div style={{textAlign:"center",marginTop:10,fontSize:8,letterSpacing:2,color:"#ffffff33"}}>BUILT FOR ILORIN • STREET SMART</div>
-</div>
-</div>
-</div>
-);
+  const [input,setInput]=useState("");
+  const [messages,setMessages]=useState([{role:"ai",text:"Yo! I be ZAYERS AI, built for Ilorin. Ask me anything bro!"}]);
+  const [isLoading,setIsLoading]=useState(false);
+  const [preview,setPreview]=useState(null);
+  const endRef=useRef(null);
+  const fileRef=useRef(null);
+  useEffect(()=>{endRef.current?.scrollIntoView({behavior:"smooth"})},[messages,isLoading]);
+  const send=async(t)=>{
+    const txt=t||input; if((!txt.trim()&&!preview)||isLoading) return;
+    const imgToSend = preview;
+    setMessages(v=>[...v,{role:"user",text:txt,image:imgToSend}]);
+    setInput(""); setPreview(null);
+    setIsLoading(true);
+    try{
+      const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:txt,image:imgToSend})});
+      const d=await r.json();
+      setMessages(v=>[...v,{role:"ai",text:d.reply}]);
+    }catch{setMessages(v=>[...v,{role:"ai",text:"Network error bro"}]);}
+    setIsLoading(false);
+  };
+  const onPick=(e)=>{
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=()=>setPreview(reader.result);
+    reader.readAsDataURL(file);
+  };
+  return(
+    <div style={{minHeight:"100vh",background:"#0a0a0a",color:"white",display:"flex",flexDirection:"column",position:"relative",overflow:"hidden"}}>
+      <style>{`@keyframes f1{0%,100%{transform:translate(0,0)}25%{transform:translate(50px,-50px)}50%{transform:translate(0,50px)}}`}</style>
+      <div style={{width:"100%",maxWidth:400,height:400,background:"radial-gradient(circle,#a855f733,transparent)",position:"absolute",top:-100,left:-100,filter:"blur(60px)",animation:"f1 10s infinite"}}></div>
+      <div style={{width:"100%",maxWidth:400,height:400,background:"radial-gradient(circle,#ec489933,transparent)",position:"absolute",bottom:100,right:-100,filter:"blur(60px)",animation:"f1 10s infinite reverse"}}></div>
+
+      <div style={{zIndex:2,padding:"32px 24px 16px"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          <div style={{width:8,height:8,background:"#22c55e",borderRadius:999}}></div>
+          <div style={{color:"#ffffff22",fontSize:10,letterSpacing:4}}>ZAYERS AI • ILORIN</div>
+        </div>
+      </div>
+
+      <div style={{zIndex:2,flex:1,overflowY:"auto",padding:"0 16px",display:"flex",flexDirection:"column",gap:12}}>
+        {messages.map((m,i)=><div key={i} style={{alignSelf:m.role==="user"?"flex-end":"flex-start",maxWidth:"85%",background:m.role==="user"?"#fff":"#1a1a1a",color:m.role==="user"?"#000":"#fff",padding:"12px 16px",borderRadius:"18px",fontSize:14,whiteSpace:"pre-wrap"}}>
+          {m.image && <img src={m.image} style={{width:"100%",borderRadius:12,marginBottom:8,display:"block"}}/>}
+          {m.text}
+        </div>)}
+        {isLoading&&<div style={{color:"#C9A86A88",fontSize:12,padding:"8px"}}>ZAYERS dey think...</div>}
+        <div ref={endRef}/>
+      </div>
+
+      <div style={{zIndex:2,padding:"16px 18px 24px"}}>
+        {preview && <div style={{marginBottom:10,position:"relative",display:"inline-block"}}><img src={preview} style={{width:70,height:70,objectFit:"cover",borderRadius:10,border:"1px solid #ffffff22"}}/><button onClick={()=>setPreview(null)} style={{position:"absolute",top:-6,right:-6,background:"#ff4444",border:"none",color:"#fff",borderRadius:999,width:20,height:20,fontSize:10,cursor:"pointer"}}>x</button></div>}
+        <div style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:999,display:"flex",alignItems:"center",padding:"6px"}}>
+          <label style={{width:32,height:32,display:"grid",placeItems:"center",cursor:"pointer"}}>
+            <input ref={fileRef} type="file" accept="image/*" onChange={onPick} style={{display:"none"}}/>
+            📎
+          </label>
+          <label style={{width:32,height:32,display:"grid",placeItems:"center",cursor:"pointer"}} onClick={()=>fileRef.current?.click()}>
+            🖼️
+          </label>
+          <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask anything..." style={{flex:1,background:"transparent",border:"none",outline:"none",color:"#fff",fontSize:14}}/>
+          <button onClick={()=>send()} style={{width:32,height:32,borderRadius:999,border:"none",background:"#fff",color:"#000",cursor:"pointer"}}>↑</button>
+        </div>
+        <div style={{textAlign:"center",color:"#ffffff22",fontSize:9,letterSpacing:2,marginTop:12}}>BUILT FOR ILORIN • STREET SMART</div>
+      </div>
+    </div>
+  );
 }
