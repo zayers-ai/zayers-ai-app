@@ -1,37 +1,46 @@
+// FILE: app/api/chat/route.ts
+// PASTE THIS - FINAL FIX FOR ZAYERS
+
 import Groq from "groq-sdk";
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-export async function POST(req) {
-  const body = await req.json();
-  const { message, image } = body;
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY!,
+});
 
+export async function POST(req: Request) {
   try {
-    const messages = image
-     ? [
+    const { messages, image } = await req.json();
+
+    // 1. IF USER SENDS IMAGE - Use Vision Model (Worldwide stable)
+    if (image) {
+      const response = await groq.chat.completions.create({
+        model: "qwen/qwen3-32b", // NEW - replaces dead llama-3.2-11b-vision
+        messages: [
           {
             role: "user",
             content: [
-              { type: "text", text: message || "Wetin dey inside this image bro? Describe am with bro style" },
-              { type: "image_url", image_url: { url: image } },
-            ],
-          },
-        ]
-      : [
-          { role: "system", content: "You be ZAYERS AI, built for Ilorin by sharp guy. You dey always add 'bro' for your talk. You be street smart, funny, helpful. You dey loyal." },
-          { role: "user", content: message },
-        ];
+              { type: "text", text: messages[messages.length - 1].content },
+              { type: "image_url", image_url: { url: image } }
+            ]
+          }
+        ],
+        max_tokens: 1024,
+      });
+      return Response.json({ reply: response.choices[0].message.content });
+    }
 
-    // Use new eye wey Groq never kill bro
-    const model = image? "meta-llama/llama-4-scout-17b-16e-instruct" : "llama-3.3-70b-versatile";
-
-    const completion = await groq.chat.completions.create({
-      model: model,
+    // 2. IF TEXT ONLY - Use Fast Text Model
+    const response = await groq.chat.completions.create({
+      model: "openai/gpt-oss-20b", // NEW - replaces dead llama-3.3-70b
       messages: messages,
-      max_tokens: 1000,
+      temperature: 0.7,
+      max_tokens: 1024,
     });
 
-    return Response.json({ reply: completion.choices[0].message.content });
-  } catch (e) {
-    return Response.json({ reply: "Error bro: " + e.message });
+    return Response.json({ reply: response.choices[0].message.content });
+
+  } catch (error: any) {
+    console.error("ZAYERS Error:", error);
+    return Response.json({ error: error.message }, { status: 500 });
   }
 }
