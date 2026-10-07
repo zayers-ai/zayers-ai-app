@@ -1,4 +1,4 @@
-// FILE: app/api/chat/route.js - WORKING VERSION
+// FILE: app/api/chat/route.js - FINAL FIX
 import Groq from "groq-sdk";
 
 const groq = new Groq({
@@ -7,36 +7,36 @@ const groq = new Groq({
 
 export async function POST(req) {
   try {
-    const body = await req.json();
-    const messages = body.messages;
-    const image = body.image;
+    const { messages, image } = await req.json();
 
+    // FOR IMAGE - Use Llama 4 Scout (Vision)
     if (image) {
-      const response = await groq.chat.completions.create({
-        model: "qwen/qwen3-32b",
+      const res = await groq.chat.completions.create({
+        model: "meta-llama/llama-4-scout-17b-16e-instruct",
         messages: [
           {
             role: "user",
             content: [
-              { type: "text", text: messages[messages.length - 1].content },
+              { type: "text", text: messages[messages.length - 1]?.content || "Describe this image" },
               { type: "image_url", image_url: { url: image } }
             ]
           }
         ],
         max_tokens: 1024,
       });
-      return Response.json({ reply: response.choices[0].message.content });
+      return Response.json({ reply: res.choices[0].message.content });
     }
 
-    const response = await groq.chat.completions.create({
+    // FOR TEXT ONLY
+    const res = await groq.chat.completions.create({
       model: "openai/gpt-oss-20b",
       messages: messages,
       max_tokens: 1024,
     });
 
-    return Response.json({ reply: response.choices[0].message.content });
+    return Response.json({ reply: res.choices[0].message.content });
 
-  } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+  } catch (e) {
+    return Response.json({ error: e.message }, { status: 500 });
   }
 }
